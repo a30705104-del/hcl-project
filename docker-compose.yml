@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Optional local MQTT Broker (Eclipse Mosquitto) for offline testing
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: industrial-twin-mqtt
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+
+  # Python FastAPI Backend & Simulation Engine
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: industrial-twin-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - MQTT_BROKER=mosquitto
+      - MQTT_PORT=1883
+      - MQTT_TLS=false
+      - DATABASE_URL=sqlite:///./data/industrial_twin.db
+      - MACHINE_ID=MTR-001
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/backend/ml/models
+    depends_on:
+      - mosquitto
+
+  # React Frontend Dashboard
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: industrial-twin-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:

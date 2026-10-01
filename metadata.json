@@ -1,0 +1,6 @@
+{
+  "name": "Industrial IoT Digital Twin - MTR-001",
+  "description": "Real-time industrial IoT digital twin and predictive maintenance platform for rotating equipment health monitoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
